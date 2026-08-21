@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fbf4df">
+  <meta name="description" content="晗晗的方特大冒险——一张可以玩的儿童旅行冒险地图。">
+  <title>晗晗的方特大冒险</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="book" id="adventure-page">
+    <header class="story-cover">
+      <div class="cover-sticker">方特站 · No.001</div>
+      <div class="cover-cloud cloud-a"></div><div class="cover-cloud cloud-b"></div>
+      <div class="sun-doodle" aria-hidden="true"><i></i></div>
+      <p class="hello">嗨，晗晗！</p>
+      <h1>晗晗的<br><span>方特大冒险</span></h1>
+      <div class="secret-letter">
+        <span class="letter-seal" aria-hidden="true">★</span>
+        <div><strong>今天你收到了一封秘密任务！</strong><p>方特里藏着5枚冒险徽章，<br>你能全部找到吗？</p></div>
+      </div>
+      <div class="scroll-cue">沿着地图出发吧 <span>↓</span></div>
+    </header>
+
+    <section class="map-progress" aria-label="我的冒险地图进度">
+      <div><span>我的冒险地图</span><strong>已找到 <b id="badge-count">0</b> 枚徽章</strong></div>
+      <div class="badge-dots" id="badge-dots"></div>
+    </section>
+
+    <section class="adventure-map" aria-label="纵向冒险地图">
+      <div class="map-sky" aria-hidden="true"></div>
+      <div class="doodle cloud cloud-1" aria-hidden="true"></div><div class="doodle cloud cloud-2" aria-hidden="true"></div><div class="doodle cloud cloud-3" aria-hidden="true"></div>
+      <div class="doodle tree tree-1" aria-hidden="true"><i></i></div><div class="doodle tree tree-2" aria-hidden="true"><i></i></div><div class="doodle tree tree-3" aria-hidden="true"><i></i></div>
+      <div class="doodle stars stars-1" aria-hidden="true">✦ · ✧</div><div class="doodle footprints" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div class="road" aria-hidden="true"><span id="road-fill"></span></div>
+
+      <div class="map-start" aria-label="出发点"><span class="start-flag">START</span><b>从这里出发！</b><div class="tiny-car" aria-hidden="true"><i></i><i></i></div></div>
+      <div id="map-stages"></div>
+
+      <button class="castle locked" id="castle" type="button" aria-label="秘密城堡，完成三关后解锁">
+        <span class="castle-stars" aria-hidden="true">✦ ✧ ✦</span>
+        <span class="castle-drawing" aria-hidden="true"><i></i><b></b><em></em></span>
+        <strong>秘密城堡</strong><small id="castle-hint">找到3枚徽章后开启</small>
+      </button>
+    </section>
+
+    <footer class="map-footer"><span>2026 · 我的童年冒险地图</span><b>方特站</b></footer>
+  </main>
+
+  <section class="record-page" id="record-page" hidden>
+    <button class="back-map" id="back-map" type="button">← 回到冒险地图</button>
+    <article class="story-page">
+      <header><p>HANHAN'S STORY · NO.001</p><h1>今天的<br><span>冒险故事</span></h1><div class="story-star">★</div></header>
+      <div class="story-summary"><div><span>今天去了</span><b>方特</b></div><div><span>找到了</span><b><em id="story-count">0</em>/5 枚徽章</b></div></div>
+      <section class="story-badges"><h2>我的冒险徽章</h2><div id="story-badge-list"></div></section>
+      <section class="story-moments"><h2>一路上留下的故事</h2><div id="story-moment-list"></div></section>
+      <footer><span>我的童年冒险地图</span><strong>+1</strong><p>株洲 · 方特站 ✓</p></footer>
+    </article>
+  </section>
+
+  <div class="challenge-layer" id="challenge-layer" hidden>
+    <div class="modal-scrim" data-close-modal></div>
+    <article class="challenge-card" role="dialog" aria-modal="true" aria-labelledby="challenge-title">
+      <button class="modal-close" type="button" data-close-modal aria-label="关闭挑战卡">×</button>
+      <div class="challenge-illustration" id="challenge-illustration"></div>
+      <p class="challenge-station" id="challenge-station"></p>
+      <h2 id="challenge-title"></h2>
+      <div class="challenge-copy" id="challenge-copy"></div>
+      <section class="evidence-box" id="evidence-box">
+        <p class="evidence-question" id="evidence-question"></p>
+        <div class="evidence-preview" id="evidence-preview" hidden><img id="photo-preview" alt="这一关保存的照片"></div>
+        <div class="photo-actions" id="photo-actions">
+          <button class="evidence-button camera-button" id="camera-button" type="button"><span>📷</span><b id="camera-label">拍下这一刻</b></button>
+          <button class="evidence-button gallery-button" id="gallery-button" type="button"><span>▧</span><b>从相册选择</b></button>
+        </div>
+        <input id="camera-input" type="file" accept="image/*" capture="environment" hidden>
+        <input id="gallery-input" type="file" accept="image/*" hidden>
+        <div class="voice-area" id="voice-area">
+          <button class="evidence-button voice-button" id="voice-button" type="button"><span>●</span><b>说给我听</b><small>最多30秒</small></button>
+          <p class="record-status" id="record-status"></p>
+          <audio id="voice-preview" controls hidden></audio>
+        </div>
+        <p class="evidence-skip">照片和声音都可以跳过，先去玩最重要。</p>
+      </section>
+      <button class="success-button" id="success-button" type="button">我闯关成功啦！</button>
+      <p class="undo-note">已经点亮后，还可以再次点击取消</p>
+    </article>
+  </div>
+
+  <div class="reward-layer" id="reward-layer" aria-live="polite" hidden>
+    <div class="star-pop" aria-hidden="true"><i>★</i><i>✦</i><i>★</i><i>✧</i><i>★</i></div>
+    <div class="reward-sticker"><span id="reward-icon"></span><strong id="reward-text"></strong><small>地图又亮了一站！</small></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
