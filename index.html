@@ -3,95 +3,116 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#fbf4df">
-  <meta name="description" content="晗晗的方特大冒险——一张可以玩的儿童旅行冒险地图。">
-  <title>晗晗的方特大冒险</title>
+  <meta name="theme-color" content="#fff8e9">
+  <meta name="description" content="把亲子出行中真实的发现、问题和表达留下来。">
+  <title>我的亲子冒险</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main class="book" id="adventure-page">
-    <header class="story-cover">
-      <div class="cover-sticker">方特站 · No.001</div>
-      <div class="cover-cloud cloud-a"></div><div class="cover-cloud cloud-b"></div>
-      <div class="sun-doodle" aria-hidden="true"><i></i></div>
-      <p class="hello">嗨，晗晗！</p>
-      <h1>晗晗的<br><span>方特大冒险</span></h1>
-      <div class="secret-letter">
-        <span class="letter-seal" aria-hidden="true">★</span>
-        <div><strong>今天你收到了一封秘密任务！</strong><p>方特里藏着5枚冒险徽章，<br>你能全部找到吗？</p></div>
+  <main class="app-shell">
+    <section class="view is-active" id="home-view" aria-labelledby="home-title">
+      <header class="home-hero paper-panel">
+        <div class="sun-mark" aria-hidden="true"></div>
+        <button class="profile" id="edit-profile" type="button" aria-label="编辑孩子资料">
+          <span class="avatar" id="profile-avatar">晗</span>
+          <span><small>我的亲子冒险</small><strong id="profile-name">晗晗</strong><em id="profile-age">5 岁</em></span>
+          <i>编辑</i>
+        </button>
+        <h1 id="home-title">每一次出发，<br>都值得慢慢留下来。</h1>
+        <p>不是要完成什么，<br>只是一起看看今天发生了什么。</p>
+        <button class="primary-button" id="start-adventure" type="button">开始一次新冒险 <span>→</span></button>
+      </header>
+
+      <section class="memory-overview" aria-label="我的成长手册">
+        <div class="section-heading"><span class="hand-dot"></span><h2>我的成长手册</h2><button class="text-button" id="open-handbook" type="button">翻一翻</button></div>
+        <div class="memory-stats">
+          <article><b id="adventure-count">0</b><span>次冒险</span></article>
+          <article><b id="discovery-count">0</b><span>个发现</span></article>
+          <article><b id="question-count">0</b><span>个好奇</span></article>
+          <article><b id="first-count">0</b><span>个第一次</span></article>
+        </div>
+      </section>
+
+      <section class="history-section" aria-labelledby="history-title">
+        <div class="section-heading"><span class="hand-dot green"></span><h2 id="history-title">留下来的冒险</h2></div>
+        <div class="empty-history" id="empty-history">
+          <div class="tiny-scene" aria-hidden="true"><i></i><b></b><em></em></div>
+          <p>下一次出发，会从这里开始。</p>
+        </div>
+        <div class="history-list" id="history-list"></div>
+      </section>
+    </section>
+
+    <section class="view" id="create-view" aria-labelledby="create-title">
+      <header class="simple-header"><button class="back-button" data-go="home" type="button">←</button><span>新的出发</span></header>
+      <div class="form-page">
+        <p class="eyebrow">准备好了再开始</p><h1 id="create-title">今天想去哪里看看？</h1>
+        <label class="field-label">地点<input id="adventure-location" type="text" maxlength="24" placeholder="比如：方特、橘子洲公园"></label>
+        <div class="form-row"><label class="field-label">孩子年龄<input id="adventure-age" inputmode="numeric" type="number" min="1" max="12" placeholder="5"></label></div>
+        <fieldset><legend>今天是什么样的地方？</legend><div class="choice-grid" id="scene-choices"></div></fieldset>
+        <fieldset><legend>最近喜欢什么？<small>选填</small></legend><div class="choice-grid soft" id="interest-choices"></div></fieldset>
+        <div class="mode-switch" role="group" aria-label="线索方式"><button class="mode is-selected" data-mode="auto" type="button">给我一点灵感</button><button class="mode" data-mode="manual" type="button">我自己写</button></div>
+        <div class="manual-fields" id="manual-fields" hidden>
+          <label class="field-label">冒险标题<input id="custom-title" maxlength="28" placeholder="比如：晗晗的公园下午"></label>
+          <label class="field-label">今天可以留意<textarea id="custom-clues" maxlength="280" placeholder="一行一条，写 2—4 条就好。"></textarea></label>
+        </div>
+        <button class="primary-button wide" id="make-clues" type="button">生成今天的冒险线索 <span>→</span></button>
+        <p class="form-note">没有标准答案，也不用把每一条都做到。</p>
       </div>
-      <div class="scroll-cue">沿着地图出发吧 <span>↓</span></div>
-    </header>
-
-    <section class="map-progress" aria-label="我的冒险地图进度">
-      <div><span>我的冒险地图</span><strong>已找到 <b id="badge-count">0</b> 枚徽章</strong></div>
-      <div class="badge-dots" id="badge-dots"></div>
     </section>
 
-    <section class="adventure-map" aria-label="纵向冒险地图">
-      <div class="map-sky" aria-hidden="true"></div>
-      <div class="doodle cloud cloud-1" aria-hidden="true"></div><div class="doodle cloud cloud-2" aria-hidden="true"></div><div class="doodle cloud cloud-3" aria-hidden="true"></div>
-      <div class="doodle tree tree-1" aria-hidden="true"><i></i></div><div class="doodle tree tree-2" aria-hidden="true"><i></i></div><div class="doodle tree tree-3" aria-hidden="true"><i></i></div>
-      <div class="doodle stars stars-1" aria-hidden="true">✦ · ✧</div><div class="doodle footprints" aria-hidden="true"><i></i><i></i><i></i></div>
-      <div class="road" aria-hidden="true"><span id="road-fill"></span></div>
-
-      <div class="map-start" aria-label="出发点"><span class="start-flag">START</span><b>从这里出发！</b><div class="tiny-car" aria-hidden="true"><i></i><i></i></div></div>
-      <div id="map-stages"></div>
-
-      <button class="castle locked" id="castle" type="button" aria-label="秘密城堡，完成三关后解锁">
-        <span class="castle-stars" aria-hidden="true">✦ ✧ ✦</span>
-        <span class="castle-drawing" aria-hidden="true"><i></i><b></b><em></em></span>
-        <strong>秘密城堡</strong><small id="castle-hint">找到3枚徽章后开启</small>
-      </button>
+    <section class="view" id="clues-view" aria-labelledby="clues-title">
+      <header class="simple-header"><button class="back-button" data-go="create" type="button">←</button><span id="clue-location-label">今天的冒险</span></header>
+      <div class="clues-page">
+        <div class="clue-intro"><span class="paper-plane" aria-hidden="true">✦</span><p class="eyebrow">轻轻看一看就好</p><h1 id="clues-title">今天可以留意</h1><p>这些不是要完成的事，<br>只是陪你们发现一点新东西。</p></div>
+        <div class="clue-list" id="clue-list"></div>
+        <div class="kind-reminder">不用全部完成，玩得开心最重要。</div>
+        <button class="primary-button wide" id="go-record" type="button">出发啦 <span>→</span></button>
+        <button class="text-button center" id="edit-clues" type="button">改一改这些线索</button>
+      </div>
     </section>
 
-    <footer class="map-footer"><span>2026 · 我的童年冒险地图</span><b>方特站</b></footer>
+    <section class="view" id="record-view" aria-labelledby="record-title">
+      <header class="simple-header"><button class="back-button" data-go="clues" type="button">←</button><span id="record-place">正在出发</span><button class="finish-link" id="open-review" type="button">先留到这里</button></header>
+      <div class="record-page">
+        <p class="eyebrow">想记的时候，再打开它</p><h1 id="record-title">这一刻，<br>想留下什么？</h1>
+        <p class="record-subtitle">不记录也没关系。好好玩最重要。</p>
+        <div class="record-actions">
+          <button class="record-card photo" data-record="photo" type="button"><span class="record-icon">▣</span><span><b>拍下来</b><small>留一张今天的照片</small></span><i id="photo-number">0</i></button>
+          <button class="record-card voice" data-record="voice" type="button"><span class="record-icon">◌</span><span><b>说出来</b><small>保存孩子原本的话</small></span><i id="voice-number">0</i></button>
+          <button class="record-card question" data-record="question" type="button"><span class="record-icon">?</span><span><b>我有一个问题</b><small>记下真实的好奇</small></span><i id="question-number">0</i></button>
+          <button class="record-card mother" data-record="mother" type="button"><span class="record-icon">♡</span><span><b>妈妈记一下</b><small>留住你看到的瞬间</small></span><i id="mother-number">0</i></button>
+        </div>
+        <div class="gentle-hint"><span>✦</span> 不用连续操作手机，想起来时记一笔就够了。</div>
+      </div>
+    </section>
+
+    <section class="view" id="review-view" aria-labelledby="review-title">
+      <header class="simple-header"><button class="back-button" data-go="record" type="button">←</button><span>把今天收起来</span></header>
+      <div class="review-page"><p class="eyebrow">没有填满，也是一段完整的日子</p><h1 id="review-title">今天有什么<br>值得留下来的？</h1><p class="review-intro" id="review-place-date"></p>
+        <div class="review-photos" id="review-photos"></div>
+        <section class="review-block"><h2>孩子的发现</h2><textarea id="discovery-input" maxlength="160" placeholder="比如：原来旋转木马会自己上下动。"></textarea></section>
+        <section class="review-block"><h2>孩子的好奇</h2><div class="saved-lines" id="review-questions"></div></section>
+        <section class="review-block"><h2>今天你说了什么？</h2><div class="saved-lines" id="review-voices"></div></section>
+        <section class="review-block"><h2>今天第一次尝试了什么？<small>选填</small></h2><input id="first-input" maxlength="100" placeholder="比如：第一次自己坐小火车。"></section>
+        <section class="review-block"><h2>妈妈想记住</h2><div class="saved-lines" id="review-mother"></div></section>
+        <button class="primary-button wide" id="make-story" type="button">把这页留下来 <span>→</span></button>
+      </div>
+    </section>
+
+    <section class="view" id="story-view" aria-labelledby="story-title">
+      <header class="simple-header"><button class="back-button" data-go="home" type="button">←</button><span>今天的冒险故事</span></header>
+      <article class="story-sheet" id="story-sheet"></article>
+    </section>
+
+    <section class="view" id="handbook-view" aria-labelledby="handbook-title">
+      <header class="simple-header"><button class="back-button" data-go="home" type="button">←</button><span>我的成长手册</span></header>
+      <div class="handbook-page"><p class="eyebrow">慢慢积累的每一句话</p><h1 id="handbook-title">我怎么认识<br>这个世界</h1><div class="handbook-sections" id="handbook-sections"></div></div>
+    </section>
   </main>
 
-  <section class="record-page" id="record-page" hidden>
-    <button class="back-map" id="back-map" type="button">← 回到冒险地图</button>
-    <article class="story-page">
-      <header><p>HANHAN'S STORY · NO.001</p><h1>今天的<br><span>冒险故事</span></h1><div class="story-star">★</div></header>
-      <div class="story-summary"><div><span>今天去了</span><b>方特</b></div><div><span>找到了</span><b><em id="story-count">0</em>/5 枚徽章</b></div></div>
-      <section class="story-badges"><h2>我的冒险徽章</h2><div id="story-badge-list"></div></section>
-      <section class="story-moments"><h2>一路上留下的故事</h2><div id="story-moment-list"></div></section>
-      <footer><span>我的童年冒险地图</span><strong>+1</strong><p>株洲 · 方特站 ✓</p></footer>
-    </article>
-  </section>
-
-  <div class="challenge-layer" id="challenge-layer" hidden>
-    <div class="modal-scrim" data-close-modal></div>
-    <article class="challenge-card" role="dialog" aria-modal="true" aria-labelledby="challenge-title">
-      <button class="modal-close" type="button" data-close-modal aria-label="关闭挑战卡">×</button>
-      <div class="challenge-illustration" id="challenge-illustration"></div>
-      <p class="challenge-station" id="challenge-station"></p>
-      <h2 id="challenge-title"></h2>
-      <div class="challenge-copy" id="challenge-copy"></div>
-      <section class="evidence-box" id="evidence-box">
-        <p class="evidence-question" id="evidence-question"></p>
-        <div class="evidence-preview" id="evidence-preview" hidden><img id="photo-preview" alt="这一关保存的照片"></div>
-        <div class="photo-actions" id="photo-actions">
-          <button class="evidence-button camera-button" id="camera-button" type="button"><span>📷</span><b id="camera-label">拍下这一刻</b></button>
-          <button class="evidence-button gallery-button" id="gallery-button" type="button"><span>▧</span><b>从相册选择</b></button>
-        </div>
-        <input id="camera-input" type="file" accept="image/*" capture="environment" hidden>
-        <input id="gallery-input" type="file" accept="image/*" hidden>
-        <div class="voice-area" id="voice-area">
-          <button class="evidence-button voice-button" id="voice-button" type="button"><span>●</span><b>说给我听</b><small>最多30秒</small></button>
-          <p class="record-status" id="record-status"></p>
-          <audio id="voice-preview" controls hidden></audio>
-        </div>
-        <p class="evidence-skip">照片和声音都可以跳过，先去玩最重要。</p>
-      </section>
-      <button class="success-button" id="success-button" type="button">我闯关成功啦！</button>
-      <p class="undo-note">已经点亮后，还可以再次点击取消</p>
-    </article>
-  </div>
-
-  <div class="reward-layer" id="reward-layer" aria-live="polite" hidden>
-    <div class="star-pop" aria-hidden="true"><i>★</i><i>✦</i><i>★</i><i>✧</i><i>★</i></div>
-    <div class="reward-sticker"><span id="reward-icon"></span><strong id="reward-text"></strong><small>地图又亮了一站！</small></div>
-  </div>
+  <div class="overlay" id="entry-overlay" hidden><div class="scrim" data-close-overlay></div><section class="entry-sheet" role="dialog" aria-modal="true" aria-labelledby="entry-title"><button class="close-overlay" data-close-overlay type="button">×</button><div id="entry-content"></div></section></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
 </body>
 </html>
