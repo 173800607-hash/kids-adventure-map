@@ -49,17 +49,25 @@ function renderChoices() {
   $('#interest-choices').innerHTML = interests.map(x => `<button class="choice ${x===selectedInterest?'is-selected':''}" data-interest="${x}" type="button">${x}</button>`).join('');
 }
 async function renderHome() {
-  const archived = state.adventures.filter(a => a.archived);
-  const discoveries = archived.flatMap(a => a.records.discoveries || []);
-  const questions = archived.flatMap(a => a.records.questions || []);
-  const firsts = archived.flatMap(a => a.records.firsts || []);
+  const archived = state.adventures.filter(a => a.archived).sort((a,b) => b.archivedAt-a.archivedAt);
   $('#profile-name').textContent = state.profile.name; $('#profile-age').textContent = `${state.profile.age || '5'} 岁`; $('#profile-avatar').textContent = state.profile.name.slice(0,1) || '我';
-  $('#adventure-count').textContent = archived.length; $('#discovery-count').textContent = discoveries.length; $('#question-count').textContent = questions.length; $('#first-count').textContent = firsts.length;
-  $('#empty-history').hidden = archived.length > 0;
-  const list = $('#history-list'); clearUrls();
-  list.innerHTML = archived.slice().sort((a,b)=>b.archivedAt-a.archivedAt).map(a => `<button class="history-card" data-open-story="${a.id}" type="button"><span class="history-cover" data-cover="${a.id}">✦</span><span><small>${dateText(a.date)} · ${clean(a.location)}</small><h3>${clean(a.title)}</h3><p>${clean(summary(a))}</p></span></button>`).join('');
+  const newest = archived[0]; clearUrls();
+  $('#empty-recent').hidden = Boolean(newest);
+  $('#recent-story').innerHTML = newest ? storyCard(newest) : '';
+  const fragments = [];
+  const latest = key => archived.flatMap(a => (a.records[key] || []).map(text => ({text,a}))).at(0);
+  const discovery=latest('discoveries'), question=latest('questions'), mother=latest('momNotes');
+  if(discovery) fragments.push(['看', '她最近发现了…', discovery.text, discovery.a]);
+  if(question) fragments.push(['问', '她最近好奇…', question.text, question.a]);
+  if(mother) fragments.push(['记', '妈妈看到的她', mother.text, mother.a]);
+  $('#growing-notes').hidden = fragments.length === 0;
+  $('#growing-note-list').innerHTML = fragments.map(([mark,label,text,a]) => `<button class="history-card" data-open-story="${a.id}" type="button"><span class="history-cover">${mark}</span><span><small>${label}</small><h3>${clean(text)}</h3><p>${dateText(a.date)} · ${clean(a.location)}</p></span></button>`).join('');
+  const list = $('#history-list');
+  $('#more-stories').hidden = archived.length < 2;
+  list.innerHTML = archived.slice(1).map(storyCard).join('');
   for (const a of archived) { const target = $(`[data-cover="${a.id}"]`); const photo = await getMedia(a.coverId || a.records.photos?.[0]?.id); if (target && photo) target.innerHTML = `<img src="${blobUrl(photo)}" alt="${clean(a.location)}留下的照片">`; }
 }
+function storyCard(a) { return `<button class="history-card" data-open-story="${a.id}" type="button"><span class="history-cover" data-cover="${a.id}">✦</span><span><small>${dateText(a.date)} · ${clean(a.location)}</small><h3>${clean(a.title)}</h3><p>${clean(summary(a))}</p></span></button>`; }
 function summary(a) { return a.records.texts?.[0] || a.records.questions?.[0] || a.records.momNotes?.[0] || a.records.discoveries?.[0] || '这一天，留下了一段自己的故事。'; }
 function newAdventure() {
   const location = $('#adventure-location').value.trim(); const age = $('#adventure-age').value.trim();

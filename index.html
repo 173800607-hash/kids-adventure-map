@@ -23,22 +23,22 @@
         <button class="primary-button" id="start-adventure" type="button">开始一次新冒险 <span>→</span></button>
       </header>
 
-      <section class="memory-overview" aria-label="我的成长手册">
-        <div class="section-heading"><span class="hand-dot"></span><h2>我的成长手册</h2><button class="text-button" id="open-handbook" type="button">翻一翻</button></div>
-        <div class="memory-stats">
-          <article><b id="adventure-count">0</b><span>次冒险</span></article>
-          <article><b id="discovery-count">0</b><span>个发现</span></article>
-          <article><b id="question-count">0</b><span>个好奇</span></article>
-          <article><b id="first-count">0</b><span>个第一次</span></article>
-        </div>
-      </section>
-
-      <section class="history-section" aria-labelledby="history-title">
-        <div class="section-heading"><span class="hand-dot green"></span><h2 id="history-title">留下来的冒险</h2></div>
-        <div class="empty-history" id="empty-history">
+      <section class="memory-overview" aria-label="最近留下的一页">
+        <div class="section-heading"><span class="hand-dot"></span><h2>最近留下的一页</h2></div>
+        <div class="history-list" id="recent-story"></div>
+        <div class="empty-history" id="empty-recent">
           <div class="tiny-scene" aria-hidden="true"><i></i><b></b><em></em></div>
           <p>下一次出发，会从这里开始。</p>
         </div>
+      </section>
+
+      <section class="memory-overview" id="growing-notes" aria-label="慢慢留下来的片段" hidden>
+        <div class="section-heading"><span class="hand-dot green"></span><h2>慢慢留下来的片段</h2><button class="text-button" id="open-handbook" type="button">翻一翻</button></div>
+        <div class="history-list" id="growing-note-list"></div>
+      </section>
+
+      <section class="history-section" id="more-stories" aria-labelledby="history-title">
+        <div class="section-heading"><span class="hand-dot green"></span><h2 id="history-title">更多冒险故事</h2></div>
         <div class="history-list" id="history-list"></div>
       </section>
     </section>
