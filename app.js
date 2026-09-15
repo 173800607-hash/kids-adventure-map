@@ -7,7 +7,7 @@ const STORE = 'media';
 const scenes = ['公园','动物园','游乐园','博物馆','自然户外','城市探索','旅行','回老家','自由探索'];
 const interests = ['恐龙','动物','颜色','机器','昆虫','自然','声音','交通工具'];
 const defaults = { profile: { name: '晗晗', age: '5' }, adventures: [] };
-let state = load(); let currentId = null; let selectedScene = ''; let selectedInterest = ''; let mode = 'auto';
+let state = load(); let currentId = null; let selectedScene = ''; let selectedInterest = ''; let mode = 'auto'; let selectedPick = [];
 let recorder; let stream; let chunks = []; let timer; let urls = [];
 
 function load() { try { return { ...defaults, ...JSON.parse(localStorage.getItem(STORAGE)), profile: { ...defaults.profile, ...JSON.parse(localStorage.getItem(STORAGE)).profile } }; } catch { return structuredClone(defaults); } }
@@ -24,10 +24,26 @@ async function getMedia(mediaId) { if (!mediaId) return null; const database = a
 async function deleteMedia(mediaId) { const database = await db(); return new Promise(resolve => { const req = database.transaction(STORE,'readwrite').objectStore(STORE).delete(mediaId); req.onsuccess = () => resolve(); req.onerror = () => resolve(); }); }
 function blobUrl(blob) { const url = URL.createObjectURL(blob); urls.push(url); return url; }
 function clearUrls() { urls.forEach(URL.revokeObjectURL); urls = []; }
-function templates(scene, interest) {
-  const place = scene || '今天去的地方'; const subject = interest ? `和「${interest}」有关的` : '';
-  return [`有没有一个${subject}东西，让你忍不住想问“为什么”？`, `今天在${place}，有没有什么是你以前没有注意过的？`, '有没有一个声音、颜色或味道，让你特别想停下来看看？', '如果今天只能记住一个瞬间，你会选哪个？'];
-}
+function ageBand(age) { const n=Number(age)||5; return n<=4?'4':n<=5?'5':'6'; }
+const ageClues = {
+  '4':['找一个会动的东西，看着它一会儿。','听一听，哪里有最好听的声音？','指一指，今天你最想去的地方。','找一个颜色，告诉妈妈它像什么。','看见一个小东西时，停下来看看它。','学一学你刚刚看到的一个动作。'],
+  '5':['这里谁最忙？它在忙什么呢？','找一个你以前没有认真看过的小角落。','哪一种声音，你想学给妈妈听？','如果这里有个小秘密，它会藏在哪里？','今天有没有一样东西，让你想多看一会儿？','找一个你觉得“真有意思”的地方。'],
+  '6':['找两样有点像、又不一样的东西。','这里有没有什么，让你想问“为什么会这样”？','猜一猜，刚才那个声音是从哪里来的？','选一个地方，说说你为什么想停在这里。','今天有没有发现一个以前忽略的小细节？','如果带朋友来，你最想让他先看什么？']
+};
+const sceneClues = {
+  '公园':{ '4':['看看哪片叶子最会跳舞。','找一个适合和妈妈坐一会儿的地方。'], '5':['这座公园里，谁可能最喜欢刮风天？','找一个让你觉得像小森林的地方。'], '6':['公园里的植物和小动物，会不会都在做自己的事？'] },
+  '动物园':{ '4':['看看哪只动物动得最有趣。','找一只你愿意和它打招呼的动物。'], '5':['哪只动物最像一个有故事的朋友？','猜猜它现在最想做什么。'], '6':['选一种动物，说说它最适合住在什么样的地方。'] },
+  '游乐园':{ '4':['找一个让你眼睛亮起来的颜色。','听一听，哪里传来快乐的声音？'], '5':['哪个地方看起来像在等你去发现？','选一个你想慢慢看一看的游戏。'], '6':['哪一个项目让你既有点紧张、又有点想试？'] },
+  '博物馆':{ '4':['找一个你觉得最大或最小的东西。','选一个东西，猜猜它会不会说话。'], '5':['哪一样东西像是从很远很远的地方来的？','找一个让你想靠近看清楚的东西。'], '6':['选一件展品，猜猜它以前是谁在用。'] },
+  '自然户外':{ '4':['听一听，风在和谁说话？','找一个摸起来不一样的东西。'], '5':['今天的风、云或树，哪一个最像有表情？','找一个小小的自然朋友。'], '6':['找一个正在变化的东西，说说它怎么变了。'] },
+  '城市探索':{ '4':['找一辆你最想坐的车。','听一听，城市里什么声音最大？'], '5':['哪一扇门后面，你最想知道有什么？','找一个你以前没留意的路边小东西。'], '6':['选一个路口，说说你觉得人们都去哪里。'] },
+  '旅行':{ '4':['找一个和家里不一样的地方。','选一个你想带回记忆里的颜色。'], '5':['这里有什么，是你第一次看到的？','找一个你想给朋友讲的有趣地方。'], '6':['这里和你熟悉的地方，哪里最不一样？'] },
+  '回老家':{ '4':['找一个让你觉得暖暖的地方。','看看谁的笑声最好听。'], '5':['这里有什么，让你觉得像一个老故事？','找一个你想再来看一次的地方。'], '6':['问一个大人：他小时候最喜欢这里的什么？'] },
+  '自由探索':{ '4':['跟着你的小脚丫，看看会走到哪里。'], '5':['今天你最想先发现什么？'], '6':['选一个方向，看看那里藏着什么小细节。'] }
+};
+function templates(scene, age, set=0) { const band=ageBand(age); const pool=[...(sceneClues[scene]?.[band]||[]),...ageClues[band]]; return pool.filter((x,i)=>pool.indexOf(x)===i).slice(set%pool.length).concat(pool).filter((x,i,a)=>a.indexOf(x)===i).slice(0,3); }
+function pickPool() { return [...(sceneClues[selectedScene]?.[ageBand($('#adventure-age').value)]||[]),...ageClues[ageBand($('#adventure-age').value)]]; }
+function renderPickCards() { const box=$('#pick-cards'); if(!box)return; const pool=pickPool(); box.innerHTML=pool.map((line,i)=>`<button class="choice pick-card ${selectedPick.includes(line)?'is-selected':''}" data-pick="${i}" type="button">${clean(line)}</button>`).join(''); }
 function renderChoices() {
   $('#scene-choices').innerHTML = scenes.map(x => `<button class="choice ${x===selectedScene?'is-selected':''}" data-scene="${x}" type="button">${x}</button>`).join('');
   $('#interest-choices').innerHTML = interests.map(x => `<button class="choice ${x===selectedInterest?'is-selected':''}" data-interest="${x}" type="button">${x}</button>`).join('');
@@ -48,11 +64,9 @@ function summary(a) { return a.records.texts?.[0] || a.records.questions?.[0] ||
 function newAdventure() {
   const location = $('#adventure-location').value.trim(); const age = $('#adventure-age').value.trim();
   if (!location) return toast('先写下今天要去的地方吧'); if (!selectedScene) return toast('选一个今天的场景吧');
-  const customLines = $('#custom-clues').value.split('\n').map(s=>s.trim()).filter(Boolean).slice(0,4);
-  const title = ($('#custom-title').value.trim() || `${state.profile.name}的${location}冒险`).slice(0,28);
-  const clues = mode === 'manual' ? customLines : templates(selectedScene,selectedInterest).slice(0,3);
-  if (mode === 'manual' && clues.length < 2) return toast('写下两条轻轻的线索就好');
-  const a = { id:id(), location, age:age || state.profile.age || '5', scene:selectedScene, interest:selectedInterest, title, date:Date.now(), clues, records:{photos:[],audios:[],texts:[],questions:[],momNotes:[],discoveries:[],firsts:[]}, archived:false };
+  const title = `${state.profile.name}的${location}冒险`;
+  const clues = mode === 'pick' && selectedPick.length ? selectedPick.slice(0,3) : templates(selectedScene,age || state.profile.age,0);
+  const a = { id:id(), location, age:age || state.profile.age || '5', scene:selectedScene, interest:selectedInterest, title, date:Date.now(), clueSet:0, clues, records:{photos:[],audios:[],texts:[],questions:[],momNotes:[],discoveries:[],firsts:[]}, archived:false };
   state.adventures.push(a); state.profile.age = a.age; save(); currentId = a.id; renderClues(); show('clues');
 }
 function renderClues() { const a = adventure(); if (!a) return show('home'); $('#clue-location-label').textContent = a.location; $('#clue-list').innerHTML = a.clues.map(c=>`<article class="clue">${clean(c)}</article>`).join(''); }
@@ -86,11 +100,13 @@ async function renderStory(a){clearUrls();const photo=await getMedia(a.coverId||
 function renderHandbook(){const archived=state.adventures.filter(a=>a.archived);const groups=[['我的好奇',archived.flatMap(a=>a.records.questions||[])],['我的发现',archived.flatMap(a=>a.records.discoveries||[])],['我的表达',archived.flatMap(a=>a.records.texts||[])],['我的第一次',archived.flatMap(a=>a.records.firsts||[])],['妈妈看到的我',archived.flatMap(a=>a.records.momNotes||[])]];$('#handbook-sections').innerHTML=groups.map(([name,items])=>`<section class="handbook-section"><h2>${name}</h2>${items.length?items.map(x=>`<p>“${clean(x)}”</p>`).join(''):'<p class="handbook-empty">以后慢慢会有的。</p>'}</section>`).join('');}
 function openProfile(){const content=$('#entry-content');content.innerHTML=`<p class="eyebrow">这会出现在你的冒险手册上</p><h2>我是谁？</h2><label class="field-label">昵称<input id="profile-name-input" maxlength="12" value="${clean(state.profile.name)}"></label><label class="field-label">年龄<input id="profile-age-input" inputmode="numeric" type="number" min="1" max="12" value="${clean(state.profile.age)}"></label><button class="primary-button wide" id="save-profile" type="button">保存</button>`;$('#entry-overlay').hidden=false;$('#save-profile').onclick=()=>{state.profile.name=$('#profile-name-input').value.trim()||'小小探索家';state.profile.age=$('#profile-age-input').value.trim()||'5';save();closeOverlay();renderHome();};}
 
-$('#start-adventure').onclick=()=>{selectedScene='';selectedInterest='';mode='auto';$('#adventure-location').value='';$('#adventure-age').value=state.profile.age;$('#custom-title').value='';$('#custom-clues').value='';$('#manual-fields').hidden=true;$$('.mode').forEach(x=>x.classList.toggle('is-selected',x.dataset.mode==='auto'));renderChoices();show('create');};
+$('#start-adventure').onclick=()=>{selectedScene='';selectedInterest='';selectedPick=[];mode='auto';$('#adventure-location').value='';$('#adventure-age').value=state.profile.age;$('#pick-fields').hidden=true;$$('.mode').forEach(x=>x.classList.toggle('is-selected',x.dataset.mode==='auto'));renderChoices();show('create');};
 $('#edit-profile').onclick=openProfile;$('#open-handbook').onclick=()=>{renderHandbook();show('handbook');};
-$('#scene-choices').onclick=e=>{const b=e.target.closest('[data-scene]');if(b){selectedScene=b.dataset.scene;renderChoices();}};$('#interest-choices').onclick=e=>{const b=e.target.closest('[data-interest]');if(b){selectedInterest=selectedInterest===b.dataset.interest?'':b.dataset.interest;renderChoices();}};
-$$('.mode').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;$$('.mode').forEach(x=>x.classList.toggle('is-selected',x===b));$('#manual-fields').hidden=mode!=='manual';});
-$('#make-clues').onclick=newAdventure;$('#go-record').onclick=()=>{renderRecord();show('record');};$('#edit-clues').onclick=()=>show('create');$('#open-review').onclick=()=>{renderReview();show('review');};
+$('#scene-choices').onclick=e=>{const b=e.target.closest('[data-scene]');if(b){selectedScene=b.dataset.scene;selectedPick=[];renderChoices();renderPickCards();}};$('#interest-choices').onclick=e=>{const b=e.target.closest('[data-interest]');if(b){selectedInterest=selectedInterest===b.dataset.interest?'':b.dataset.interest;renderChoices();}};
+$('#adventure-age').onchange=()=>{selectedPick=[];renderPickCards();};
+$('#pick-cards').onclick=e=>{const b=e.target.closest('[data-pick]');if(!b)return;const line=pickPool()[Number(b.dataset.pick)];selectedPick=selectedPick.includes(line)?selectedPick.filter(x=>x!==line):(selectedPick.length<3?[...selectedPick,line]:selectedPick);renderPickCards();};
+$$('.mode').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;$$('.mode').forEach(x=>x.classList.toggle('is-selected',x===b));$('#pick-fields').hidden=mode!=='pick';if(mode==='pick')renderPickCards();});
+$('#make-clues').onclick=newAdventure;$('#go-record').onclick=()=>{renderRecord();show('record');};$('#shuffle-clues').onclick=()=>{const a=adventure();a.clueSet=(a.clueSet||0)+3;a.clues=templates(a.scene,a.age,a.clueSet);save();renderClues();toast(`换了一组适合 ${a.age} 岁的灵感`);};$('#open-review').onclick=()=>{renderReview();show('review');};
 $$('[data-go]').forEach(b=>b.onclick=()=>{if(b.dataset.go==='home')renderHome();show(b.dataset.go);});
 $('.record-actions').onclick=e=>{const b=e.target.closest('[data-record]');if(b)openOverlay(b.dataset.record);};
 $('#entry-overlay').onclick=e=>{if(e.target.closest('[data-close-overlay]'))closeOverlay();const b=e.target.closest('[data-save-text]');if(b)saveEntry(b.dataset.saveText);};
